@@ -18,10 +18,18 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
         
-    - name: Build and push test image
+    - name: Build and push PHP image
       uses: docker/build-push-action@v4
       with:
         context: .
+        file: ./Dockerfile
+        push: true
+        tags: ghcr.io/${{ github.repository }}/php:latest
+        
+    - name: Build and push Caddy image
+      uses: docker/build-push-action@v4
+      with:
+        context: ./docker
         file: ./docker/Dockerfile
         push: true
-        tags: ghcr.io/${{ github.repository }}/test-image:latest
+        tags: ghcr.io/${{ github.repository }}/caddy:latest
