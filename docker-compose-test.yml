@@ -1,0 +1,30 @@
+services:
+  php:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    environment:
+      - DB_CONNECTION=pgsql
+      - DB_HOST=pgsql
+      - DB_PORT=5432
+      - DB_DATABASE=testing
+      - DB_USERNAME=laravel
+      - DB_PASSWORD=admin123
+      - REDIS_HOST=redis
+    depends_on:
+      - pgsql
+      - redis
+
+  pgsql:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=testing
+      - POSTGRES_USER=laravel
+      - POSTGRES_PASSWORD=admin123
+    tmpfs:
+      - /var/lib/postgresql/data
+
+  redis:
+    image: redis:alpine
+    tmpfs:
+      - /data
