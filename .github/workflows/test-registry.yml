@@ -1,7 +1,9 @@
-name: Test Container Registry
+name: Laravel CI/CD Pipeline
 
 on:
   push:
+    branches: [ main ]
+  pull_request:
     branches: [ main ]
 
 permissions:
@@ -9,7 +11,55 @@ permissions:
   packages: write
 
 jobs:
-  push-test-image:
+  test:
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: laravel_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.2'
+        extensions: pdo_pgsql, redis
+        coverage: none
+
+    - name: Copy .env.example
+      run: cp .env.example .env
+
+    - name: Install Dependencies
+      run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+
+    - name: Generate key
+      run: php artisan key:generate
+
+    - name: Run Tests
+      env:
+        DB_CONNECTION: pgsql
+        DB_HOST: localhost
+        DB_PORT: 5432
+        DB_DATABASE: laravel_test
+        DB_USERNAME: postgres
+        DB_PASSWORD: postgres
+      run: php artisan test
+
+  build-and-push:
+    needs: test
     runs-on: ubuntu-latest
     
     steps:
