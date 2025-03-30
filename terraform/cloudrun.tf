@@ -1,11 +1,11 @@
 resource "google_cloud_run_service" "laravel" {
-  name     = "laravel-app"
+  name     = "devops-laravel"
   location = var.region
 
   template {
     spec {
       containers {
-        image = "gcr.io/${var.project_id}/laravel-app"
+        image = "gcr.io/${var.project_id}/devops-laravel"
         
         env {
           name  = "DB_CONNECTION"
